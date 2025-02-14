@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Active Sessions</title>
+</head>
+<body>
+    <h1>Active Sessions</h1>
+    <table border="1">
+        <tr>
+            <th>Username</th>
+            <th>Login Time</th>
+        </tr>
+        {% for session in active_sessions %}
+        <tr>
+            <td>{{ session[0] }}</td>
+            <td>{{ session[1] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <a href="{{ url_for('admin') }}">Back to Admin Panel</a>
+</body>
+</html>

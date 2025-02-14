@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VulnPortal</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <h1>Welcome to VulnPortal</h1>
+    <p>A deliberately vulnerable web service.</p>
+    <nav>
+        <a href="{{ url_for('login') }}">Log In</a> |
+        <a href="{{ url_for('signup') }}">Sign Up</a> |
+        <a href="{{ url_for('upload') }}">Upload File</a> |
+        <a href="{{ url_for('user_files') }}">View Uploaded Files</a>
+    </nav>
+</body>
+</html>

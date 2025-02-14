@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Users and Employees</title>
+    <script>
+        function updateForm() {
+            var action = document.getElementById("action").value;
+            var form = document.getElementById("manageForm");
+            var fields = document.getElementById("fields");
+
+            fields.innerHTML = "";
+
+            if (action === "add_user" || action === "delete_user") {
+                fields.innerHTML += '<label for="username">Username:</label>';
+                fields.innerHTML += '<input type="text" id="username" name="username" required><br>';
+                if (action === "add_user") {
+                    fields.innerHTML += '<label for="password">Password:</label>';
+                    fields.innerHTML += '<input type="password" id="password" name="password" required><br>';
+                }
+            } else if (action === "add_employee" || action === "delete_employee") {
+                fields.innerHTML += '<label for="name">Name:</label>';
+                fields.innerHTML += '<input type="text" id="name" name="name" required><br>';
+                if (action === "add_employee") {
+                    fields.innerHTML += '<label for="email">Email:</label>';
+                    fields.innerHTML += '<input type="email" id="email" name="email" required><br>';
+                    fields.innerHTML += '<label for="address">Address:</label>';
+                    fields.innerHTML += '<input type="text" id="address" name="address" required><br>';
+                }
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Manage Users and Employees</h1>
+    <form id="manageForm" method="POST">
+        <label for="action">Action:</label>
+        <select id="action" name="action" onchange="updateForm()" required>
+            <option value="">Select an action</option>
+            <option value="add_user">Add User</option>
+            <option value="delete_user">Delete User</option>
+            <option value="add_employee">Add Employee</option>
+            <option value="delete_employee">Delete Employee</option>
+        </select>
+        <br>
+        <div id="fields"></div>
+        <button type="submit">Submit</button>
+    </form>
+    <a href="{{ url_for('admin') }}">Back to Admin Panel</a>
+</body>
+</html>

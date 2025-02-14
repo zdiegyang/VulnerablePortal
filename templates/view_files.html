@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Files</title>
+</head>
+<body>
+    <h1>Uploaded Files</h1>
+    <table border="1">
+        <tr>
+            <th>Filename</th>
+            <th>Actions</th>
+        </tr>
+        {% for file in files %}
+        <tr>
+            <td>{{ file }}</td>
+            <td>
+                <form action="{{ url_for('delete_file') }}" method="POST" style="display:inline;">
+                    <input type="hidden" name="filename" value="{{ file }}">
+                    <button type="submit">Delete</button>
+                </form>
+                <a href="{{ url_for('download_file', filename=file) }}">Download</a>
+                <a href="{{ url_for('view_file', filename=file) }}" target="_blank">View</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    <h2>Upload New File</h2>
+    <form action="{{ url_for('upload') }}" method="POST" enctype="multipart/form-data">
+        <input type="file" name="file" required>
+        <button type="submit">Upload</button>
+    </form>
+    <a href="{{ url_for('admin') }}">Back to Admin Panel</a>
+</body>
+</html>

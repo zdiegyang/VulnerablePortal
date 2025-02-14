@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Signup</title>
+</head>
+<body>
+    <h1>Signup</h1>
+    <form method="post">
+        Username: <input name="username"><br>
+        Password: <input type="password" name="password"><br>
+        <input type="submit" value="Signup">
+    </form>
+    <a href="{{ url_for('login') }}">Already have an account? Login here</a> |
+    <a href="{{ url_for('home') }}">Go back to main page</a>
+</body>
+</html>
