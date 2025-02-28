@@ -2,7 +2,7 @@ import pymysql
 import hashing as hash
 
 # MySQL database connection details
-# This type of credential storage might bee insecure 
+# This type of credential storage might be insecure 
 db_config = {
     'host': '46.244.8.65',
     'user': 'diego',
