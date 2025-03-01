@@ -3,6 +3,7 @@ import hashing as hash
 
 # MySQL database connection details
 # This type of credential storage might be insecure 
+# TODO: Modify db access credentials to not store them in plaintext in the code (Cryptographic Failures and Security Misconfiguration)
 db_config = {
     'host': '46.244.8.65',
     'user': 'diego',
