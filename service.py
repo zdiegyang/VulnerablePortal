@@ -14,6 +14,7 @@ from flask_limiter.util import get_remote_address
 # TODO: Patch all vulnerabilities that I can find in the app
 # TODO: Add implementation to prevent cookie stealing via packet interception
 # TODO: Ensure proper Logging anf Monitoring
+# TODO. Update requirement.txt with the new libraries that have been recently included
 
 app = Flask(__name__)
 app.secret_key = os.getenv('FLASK_SECRET_KEY', 'default_secret_key')  
