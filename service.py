@@ -10,6 +10,7 @@ from werkzeug.utils import secure_filename
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 import logging 
+from datetime import timedelta
 
 
 # TODO: Patch all vulnerabilities that I can find in the app
@@ -19,6 +20,8 @@ app = Flask(__name__)
 app.secret_key = os.getenv('FLASK_SECRET_KEY', 'default_secret_key')  
 
 app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024  # 5 MB limit
+
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
 
 logging.basicConfig(level=logging.INFO)
 
@@ -31,6 +34,12 @@ limiter = Limiter(
 UPLOAD_FOLDER = os.path.join(app.root_path, 'uploads')
 if not os.path.exists(UPLOAD_FOLDER):
     os.mkdir(UPLOAD_FOLDER)
+
+# Sessions are marked as permanent so that session lifetime is applied
+@app.before_request
+def make_session_permanent(): 
+    session.permanent = True
+
 
 # Function to set CSP headers
 # Implementation of DOM to prevent XSS and other code execution in the browser
@@ -81,6 +90,7 @@ def login():
         if user_secure:
             password_secure, salt = user_secure
             if hash.is_password_same(password, password_secure, salt):
+                session.clear() # Regenerates session ID
                 session['user'] = username
                 cursor.execute("INSERT INTO active_sessions (username) VALUES (%s) ON DUPLICATE KEY UPDATE login_time=CURRENT_TIMESTAMP", (username,))
                 conn.commit()
