@@ -7,17 +7,24 @@ from database import init_db, get_db_connection, add_user, delete_user, add_empl
 import hashing as hash
 import sanitizefile
 from werkzeug.utils import secure_filename
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 
 # TODO: Patch all vulnerabilities that I can find in the app
 # TODO: Add implementation to prevent cookie stealing via packet interception
-
+# TODO: Ensure proper Logging anf Monitoring
 
 app = Flask(__name__)
 app.secret_key = os.getenv('FLASK_SECRET_KEY', 'default_secret_key')  
 
 app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024  # 5 MB limit
 
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=["200 per day", "50 per hour"]
+)
 
 UPLOAD_FOLDER = os.path.join(app.root_path, 'uploads')
 if not os.path.exists(UPLOAD_FOLDER):
@@ -54,6 +61,7 @@ def home():
 # Route: Login (Weak Authentication)
 # Added parametized SQL queries, SQL injection is patched now
 @app.route('/login', methods=['GET', 'POST'])
+@limiter.limit("5 per minute")
 def login():
     if request.method == 'POST':
         username = request.form['username']
@@ -172,7 +180,7 @@ def employee():
         emp_id = request.args.get("id")
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute(f"SELECT * FROM employees WHERE id={emp_id}")  
+        cursor.execute("SELECT * FROM employees WHERE id=%s", (emp_id,))  
         employee = cursor.fetchone()
         conn.close()
         if employee:
