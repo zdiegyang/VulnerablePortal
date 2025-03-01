@@ -143,4 +143,3 @@ def view_table_db(table):
 
 
 
-
