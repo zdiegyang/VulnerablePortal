@@ -9,16 +9,18 @@ import sanitizefile
 from werkzeug.utils import secure_filename
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+import logging 
 
 
 # TODO: Patch all vulnerabilities that I can find in the app
-# TODO: Ensure proper Logging and Monitoring
 
 
 app = Flask(__name__)
 app.secret_key = os.getenv('FLASK_SECRET_KEY', 'default_secret_key')  
 
 app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024  # 5 MB limit
+
+logging.basicConfig(level=logging.INFO)
 
 limiter = Limiter(
     get_remote_address,
@@ -66,6 +68,8 @@ def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
+
+        logging.info(f"Login attempt for user: {username}")
         
         conn = get_db_connection()
         cursor = conn.cursor()
