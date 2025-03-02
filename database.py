@@ -12,10 +12,12 @@ db_config = {
 }
 
 def get_db_connection():
+    """Gets the connection to the remote MySQL database given the credentials and configuration."""
     return pymysql.connect(**db_config)
 
-# Database initialization (Insecure - No proper setup)
 def init_db():
+    """Initializes the database. """
+
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("""
@@ -68,10 +70,12 @@ def init_db():
     conn.close()
 
 def search_user(username): 
+    """Searches for the username in the database"""
+
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT * FROM users WHERE username=%s", (username,))
+    cursor.execute("SELECT * FROM users_secure WHERE username=%s", (username,))
     user = cursor.fetchall()
 
     conn.close()
@@ -79,6 +83,8 @@ def search_user(username):
 
 
 def search_employee(employee_name): 
+    """Searches for the employee name in the database"""
+
     conn = get_db_connection()
     cursor = conn.cursor()
 
@@ -90,12 +96,11 @@ def search_employee(employee_name):
 
 
 def add_user(username, password):
+    """Inserts a new entry to the existing users. """
+
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    # Insert into users table (insecure)
-    cursor.execute("INSERT INTO users (username, password) VALUES (%s, %s)", (username, password))
-
     # Hash the password and insert into users_secure table (secure)
     hashed_password, salt = hash.hash_password(password)
     cursor.execute("INSERT INTO users_secure (username, password, salt) VALUES (%s, %s, %s)", (username, hashed_password, salt))
@@ -104,17 +109,19 @@ def add_user(username, password):
     conn.close()
 
 def delete_user(username):
+    """Deletes a user from the database. """
+    
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    cursor.execute("DELETE FROM users WHERE username=%s", (username,))
-
     cursor.execute("DELETE FROM users_secure WHERE username=%s", (username,))
 
     conn.commit()
     conn.close()
 
 def add_employee(name, email, address):
+    """Adds a new entry to the existing employees. """
+
     conn = get_db_connection()
     cursor = conn.cursor()
     
@@ -124,6 +131,8 @@ def add_employee(name, email, address):
     conn.close()
 
 def delete_employee(employee_name):
+    """Deletes an employee from the database. """
+
     conn = get_db_connection()
     cursor = conn.cursor()
     
@@ -133,6 +142,8 @@ def delete_employee(employee_name):
     conn.close()
 
 def view_table_db(table): 
+    """Returns the data from a table in the database. """
+
     conn = get_db_connection()
     cursor = conn.cursor()
 

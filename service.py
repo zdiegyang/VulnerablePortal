@@ -13,8 +13,6 @@ import logging
 from datetime import timedelta
 
 
-# TODO: Patch all vulnerabilities that I can find in the app
-
 
 app = Flask(__name__)
 app.secret_key = os.getenv('FLASK_SECRET_KEY', 'default_secret_key')  
@@ -35,16 +33,19 @@ UPLOAD_FOLDER = os.path.join(app.root_path, 'uploads')
 if not os.path.exists(UPLOAD_FOLDER):
     os.mkdir(UPLOAD_FOLDER)
 
-# Sessions are marked as permanent so that session lifetime is applied
+# 
 @app.before_request
-def make_session_permanent(): 
+def make_session_permanent():
+    """Sessions are marked as permanent so that session lifetime is applied. """ 
+
     session.permanent = True
 
 
-# Function to set CSP headers
-# Implementation of DOM to prevent XSS and other code execution in the browser
 @app.after_request
 def set_csp(response):
+    """Function to set CSP headers. This is an implementation of DOM and SOP to prevent XSS and 
+    other forms of code execution from being performed."""
+
     nonce = secrets.token_urlsafe(16)
     csp = {
         "default-src": "'self'",
@@ -63,17 +64,19 @@ def set_csp(response):
     return response
 
 
-# Route: Home Page
 @app.route('/')
 def home():
+    """Renders the home page of the website. """
     return render_template('home.html')
 
 
-# Route: Login (Weak Authentication)
-# Added parametized SQL queries, SQL injection is patched now
 @app.route('/login', methods=['GET', 'POST'])
 @limiter.limit("5 per minute")
 def login():
+    """Processes login requests from users, and adds the username to the table of active sessions if login is successful.
+    This version of the function parametized SQL queries in order to avoid SQL injection, and implements rate limitation 
+    to avoid brute-force attacks. """
+    
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
@@ -104,22 +107,26 @@ def login():
         else:
             conn.close()
             return "Invalid credentials."
+
     return render_template('login.html')
 
 
 
-# Route: Login Success
 @app.route('/login_success')
 def login_success():
+    """Renders the page after a users has successfully logged in. """
+
     if 'user' in session:
         return render_template('login_success.html', username=session['user'])
+    
     return redirect(url_for('login'))
 
 
-# Route: Signup (Weak Authentication)
-# SQL queries are now parametized, and new users' data is now stored securely using hashing and salting
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
+    """Processes signup operation for new users. SQL queries are also parametized here, and we also use hashing and salting for 
+    password storage. """
+
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
@@ -136,9 +143,12 @@ def signup():
     return render_template('signup.html')
 
 
-# Route: File Upload updated with sanitation
 @app.route('/upload', methods=['GET', 'POST'])
 def upload():
+
+    """Handles the upload of files with input santitation. Does not accept files outside the allowed extensions nor executable files 
+    and performs a lightweight scan to detect these. """
+
     if request.method == 'POST':
         if 'file' not in request.files:
             return "No file uploaded."
@@ -167,10 +177,12 @@ def upload():
     return render_template('upload.html')
 
 
-# Route: Execute Admin Command with a reduced command set that is allowed to avoid excessive exploitation
-# Added authentication: only 'admin' can execute cmd 
 @app.route('/exec', methods=['POST'])
 def execute():
+    """Executes Admin Command with a reduced command set in order to avoid excessive explotation. 
+    Allowed commands: 'ls', 'pwd', 'whoami'. 
+    Only admin can execute these commads via browser. """
+
     if 'user' in session and session['user'] == 'admin':
         cmd = request.form.get("cmd")
         
@@ -185,11 +197,14 @@ def execute():
     return redirect(url_for('login'))
 
 
-# Route: View Employee Details 
-# Escaping is implemented to avoid special characters from being executed as code by the browser
-# Added authentication: only 'admin' can access this endpoint and access employee data
 @app.route('/employee', methods=['GET'])
 def employee():
+
+    """Endpoint for viewing employee details. Escaping is implemented to avoid special characters from being executed as code 
+    by the browser. 
+    Only admin user can access this endpoint (prior authentication is needed here). 
+    """
+
     if 'user' in session and session['user'] == 'admin':
         emp_id = request.args.get("id")
         conn = get_db_connection()
@@ -202,10 +217,12 @@ def employee():
     return "Employee not found."
 
 
-# Route: API Endpoint for viewing user data
-# Authentication required to access this endpoint --> only admin privileges are allowed
 @app.route('/api/data', methods=['GET'])
 def api_data():
+
+    """API endpoint for viewing user data. Authentication is now required to access this endpoint: only admin is allowed to 
+    access this."""
+
     if 'user'in session and session['user'] == 'admin':
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -219,14 +236,18 @@ def api_data():
 # Route: Admin Panel
 @app.route('/admin')
 def admin():
+    """Renders the admin panel. """
+
     if 'user' in session and session['user'] == 'admin':
         return render_template('admin.html', username=session['user'])
     return redirect(url_for('login'))
 
 
-# Route: View Users (Admin Functionality)
 @app.route('/view_users')
 def view_users():
+
+    """Admin Functionality: View user data (now it does not display passwords in plaintext)"""
+
     if 'user' in session and session['user'] == 'admin':
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -237,9 +258,10 @@ def view_users():
     return redirect(url_for('login'))
 
 
-# Route: View Employees (Admin Functionality)
 @app.route('/view_employees')
 def view_employees():
+    """Admin Functionality: View employee details"""
+
     if 'user' in session and session['user'] == 'admin':
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -250,9 +272,11 @@ def view_employees():
     return redirect(url_for('login'))
 
 
-# Route: Manage Users and Employees (Admin Functionality)
 @app.route('/manage', methods=['GET', 'POST'])
 def manage():
+
+    """Admin Functionality: Manages user and employee data. Admin can add/delete users and employees on the database"""
+
     if 'user' in session and session['user'] == 'admin':
         if request.method == 'POST':
             action = request.form['action']
@@ -279,6 +303,9 @@ def manage():
 # Route: View Active Sessions (Admin Functionality)
 @app.route('/view_active_sessions')
 def view_active_sessions():
+
+    """Admin Functionality: View the current active sessions. """
+
     if 'user' in session and session['user'] == 'admin':
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -292,6 +319,9 @@ def view_active_sessions():
 # Route: View Files (Admin Functionality)
 @app.route('/view_files')
 def view_files():
+
+    """Admin Functionality: View uploaded files by users via the admin panel. """
+
     if 'user' in session and session['user'] == 'admin':
         files = os.listdir(UPLOAD_FOLDER)
         return render_template('view_files.html', files=files)
@@ -301,6 +331,9 @@ def view_files():
 # Route: Delete File (Admin Functionality)
 @app.route('/delete_file', methods=['POST'])
 def delete_file():
+
+    """Admin Functionality: Delete uploaded files. """
+
     if 'user' in session and session['user'] == 'admin':
         filename = request.form['filename']
         file_path = os.path.join(UPLOAD_FOLDER, filename)
@@ -313,18 +346,21 @@ def delete_file():
 # Route: Download File
 @app.route('/download_file/<filename>')
 def download_file(filename):
+    """Downloads a file from the browser. """
     return send_from_directory(UPLOAD_FOLDER, filename)
 
 
 # Route: View File
 @app.route('/view_file/<filename>')
 def view_file(filename):
+    """Views the file in the browser"""
     return send_from_directory(UPLOAD_FOLDER, filename)
 
 
 # Route: View Files for Users
 @app.route('/user_files')
 def user_files():
+    """Renders the page to view all the uploaded files. """
     files = os.listdir(UPLOAD_FOLDER)
     return render_template('user_files.html', files=files)
 
@@ -332,6 +368,7 @@ def user_files():
 # Route: Logout
 @app.route('/logout')
 def logout():
+    """Logout functionality. Removes the username that has logged out from the table of active sessions"""
     if 'user' in session:
         conn = get_db_connection()
         cursor = conn.cursor()
