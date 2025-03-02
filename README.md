@@ -1,7 +1,10 @@
 # Overview of the Service
 
 VulnPortal is a simple vulnerable web service designed for educational purposes in the field of cyber security. It features many of the OWASP Top 10 vulnerabilities, where users may exploit to test different penetration testing techniques. The web service was created using Flask (Python library) for the back end, and basic HTML and CSS for the front end.
-**WARNING: This is for educational purposes only - do not employ penetration testing techniques on real websites without authorization**
+
+**WARNING: This is for educational purposes only - do not employ penetration testing techniques on real websites without authorization.**
+
+**WARNING: This is the version where many of the initial vulnerabilities have been patched, so hacking may be more challenging.**
 
 # Prerequisites
 Make sure you have docker installed beforehand on your machine. 
